@@ -1,6 +1,7 @@
 Parameters:
   AppName:
     Type: String
+    Default: {{ sceptre_user_data.AppName }}
 
 Resources:
 

@@ -1,0 +1,7 @@
+template_path: 'template.yaml'
+
+configuration:
+  sceptre_user_data:
+    AppName:
+      required: true
+      unique: True'
