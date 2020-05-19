@@ -1,0 +1,11 @@
+{
+  "name": "cf-ecs-task-role",
+  "version": "1.0.0",
+  "description": "",
+  "main": "template.yaml",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ray",
+  "license": "ISC"
+}

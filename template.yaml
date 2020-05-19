@@ -1,0 +1,48 @@
+Parameters:
+  AppName:
+    Type: String
+
+Resources:
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppName}-task-role'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - "ecs-tasks.amazonaws.com"
+              - "lambda.amazonaws.com"
+          Action:
+            - "sts:AssumeRole"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  RoleAccessToSecrets:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: allowTaskAccessToSecrets
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - ssm:DescribeParameters
+              - ssm:GetParam*
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/app-secrets/${AppName}'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/app-secrets/${AppName}/*'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/app-secrets/shared'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/app-secrets/shared/*'
+      Roles:
+        - !Ref TaskRole
+
+Outputs:
+  Name:
+    Value: !Ref TaskRole
+  Arn:
+    Value: !GetAtt TaskRole.Arn
