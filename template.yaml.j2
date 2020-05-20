@@ -23,6 +23,49 @@ Resources:
       - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
+  ServiceSecretKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub For encrypting secrets to be read only by {{ sceptre_user_data.AppName }}.
+      Enabled: true
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow encryption with the key
+            Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt TaskRole.Arn
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:DescribeKey'
+            Resource: '*'
+          - Sid: Allow decryption with the key
+            Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt TaskRole.Arn
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Resource: '*'
+
+  ServiceKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/app-key-${AppName}
+      TargetKeyId: !Ref ServiceSecretKey
+
   RoleAccessToSecrets:
     Type: AWS::IAM::Policy
     Properties:
@@ -47,3 +90,5 @@ Outputs:
     Value: !Ref TaskRole
   Arn:
     Value: !GetAtt TaskRole.Arn
+  KeyId:
+    Value: !Ref ServiceSecretKey
