@@ -2,6 +2,9 @@ Parameters:
   AppName:
     Type: String
     Default: {{ sceptre_user_data.AppName }}
+  PrincipalRoleName:
+    Type: String
+    Default: {{ sceptre_user_data.PrincipalRoleName }}
 
 Resources:
 
@@ -37,6 +40,7 @@ Resources:
             Principal:
               AWS:
                 - !Sub arn:aws:iam::${AWS::AccountId}:root
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/{{ sceptre_user_data.PrincipalRoleName }}
             Action: 'kms:*'
             Resource: '*'
           - Sid: Allow encryption with the key
